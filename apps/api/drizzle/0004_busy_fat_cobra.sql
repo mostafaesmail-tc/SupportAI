@@ -1,0 +1,1 @@
+ALTER TABLE "knowledge_source_chunks" ADD CONSTRAINT "knowledge_source_chunks_index_nonnegative" CHECK ("knowledge_source_chunks"."chunk_index" >= 0);

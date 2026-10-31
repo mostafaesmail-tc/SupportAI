@@ -1,0 +1,1 @@
+ALTER TABLE "knowledge_source_chunks" ADD COLUMN "embedding" vector(768);
