@@ -5,15 +5,20 @@ import {
   Get,
   Patch,
   Post,
-  Param
+  Param,
+  Query
 } from '@nestjs/common';
 import { AgentsService } from './agents.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
 import { UpdateAgentDto } from './dto/update-agent.dto.js';
+import { KnowledgeProcessingService } from '../knowledge-sources/knowledge-processing.service.js';
 
 @Controller('agents')
 export class AgentsController {
-  constructor(private readonly agentsService: AgentsService) {}
+  constructor(
+    private readonly agentsService: AgentsService,
+    private readonly knowledgeProcessingService: KnowledgeProcessingService,
+  ) {}
 
   @Post()
   create(@Body() createAgentDto: CreateAgentDto) {
@@ -40,4 +45,15 @@ export class AgentsController {
   deleteAgentById(@Param('id')id: string) {
     return this.agentsService.deleteAgentById(id);
   }
+
+      @Get(':agentId/search')
+    searchKnowledge(
+    @Param('agentId') agentId: string,
+    @Query('q') question: string,
+    ) {
+    return this.knowledgeProcessingService.searchKnowledge(
+        agentId,
+        question,
+    );
+    }
 }

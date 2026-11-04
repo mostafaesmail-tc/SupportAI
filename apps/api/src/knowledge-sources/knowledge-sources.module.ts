@@ -10,6 +10,7 @@ import { EmbeddingModule } from '../embeddings/embedding.module.js';
 
 @Module({
   imports: [DatabaseModule, EmbeddingModule],
+  exports: [KnowledgeProcessingService],
   controllers: [KnowledgeSourcesController],
   providers: [
     KnowledgeSourcesService,

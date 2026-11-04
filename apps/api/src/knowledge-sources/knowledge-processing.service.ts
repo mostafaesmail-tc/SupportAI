@@ -5,7 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { and, eq, isNotNull, sql, desc } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
+import { SearchResult } from './interfaces/search-result.interface.js';
 
 import { DatabaseProvider } from '../db/database.provider.js';
 import { EmbeddingService } from '../embeddings/embedding.service.js';
@@ -23,6 +24,50 @@ export class KnowledgeProcessingService {
     private readonly database: DatabaseProvider,
     private readonly embeddingService: EmbeddingService
   ) {}
+
+  async searchKnowledge(
+    agentId: string,
+    question: string,
+    limit = 5,
+    maxDistance = 0.5
+  ): Promise<SearchResult[]> {
+    const queryEmbedding =
+      await this.embeddingService.generateEmbedding(question);
+
+    const similarity = sql<number>`
+      ${knowledgeSourceChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector
+    `;
+
+    const results = await this.database.db
+      .select({
+        content: knowledgeSourceChunks.content,
+        distance: similarity,
+        sourceId: knowledgeSourceChunks.knowledgeSourceId,
+        sourceTitle: knowledgeSources.title,
+        chunkIndex: knowledgeSourceChunks.chunkIndex,
+      })
+      .from(knowledgeSourceChunks)
+      .innerJoin(
+        knowledgeSources,
+        eq(
+          knowledgeSourceChunks.knowledgeSourceId,
+          knowledgeSources.id,
+        ),
+      )
+      .where(
+        sql`
+          ${knowledgeSources.agentId} = ${agentId}
+          AND ${knowledgeSources.status} = 'ready'
+          AND ${knowledgeSourceChunks.embedding} IS NOT NULL
+        `,
+      )
+      .orderBy(similarity)
+      .limit(limit);
+
+    return results.filter(
+    (result) => result.distance <= maxDistance,
+  );
+  }
 
   async processKnowledgeSource(
     agentId: string,

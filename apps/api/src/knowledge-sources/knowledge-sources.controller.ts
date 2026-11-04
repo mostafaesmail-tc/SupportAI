@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Body, ParseUUIDPipe, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, ParseUUIDPipe, Delete, Query } from '@nestjs/common';
 import { KnowledgeSourcesService } from './knowledge-sources.service.js';
 import { CreateKnowledgeSourceDto } from './dto/create-knowledge-source.dto.js';
 import { KnowledgeProcessingService } from './knowledge-processing.service.js';
@@ -38,4 +38,18 @@ export class KnowledgeSourcesController {
         knowledgeSourceId,
     );
     }
+    
+    @Get(':agentId/search')
+    searchKnowledge(
+    @Param('agentId') agentId: string,
+    @Query('q') question: string,
+    ) {
+    return this.knowledgeProcessingService.searchKnowledge(
+        agentId,
+        question,
+    );
+    }
+
 }
+// GET http://localhost:3001/agents/8831d50f-a26d-45ae-8888-e88c31581563/search?q=I%20forgot%20my%20password
+// 8831d50f-a26d-45ae-8888-e88c31581563
