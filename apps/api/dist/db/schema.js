@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, unique, check, vector } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, integer, unique, check, vector, jsonb, pgEnum, } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql/sql';
 export const agents = pgTable('agents', {
     id: uuid('id').defaultRandom().primaryKey(),
@@ -36,4 +36,33 @@ export const knowledgeSourceChunks = pgTable('knowledge_source_chunks', {
     unique('knowledge_source_chunks_source_index_unique').on(table.knowledgeSourceId, table.chunkIndex),
     check('knowledge_source_chunks_index_nonnegative', sql `${table.chunkIndex} >= 0`),
 ]);
+export const conversations = pgTable('conversations', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    agentId: uuid('agent_id')
+        .notNull()
+        .references(() => agents.id, { onDelete: 'cascade' }),
+    title: varchar('title'),
+    createdAt: timestamp('created_at')
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp('updated_at')
+        .defaultNow()
+        .notNull(),
+});
+export const messageRoleEnum = pgEnum('message_role', [
+    'user',
+    'assistant',
+]);
+export const messages = pgTable('messages', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    conversationId: uuid('conversation_id')
+        .notNull()
+        .references(() => conversations.id, { onDelete: 'cascade' }),
+    role: messageRoleEnum('role').notNull(),
+    content: text('content').notNull(),
+    sources: jsonb('sources'),
+    createdAt: timestamp('created_at')
+        .defaultNow()
+        .notNull(),
+});
 //# sourceMappingURL=schema.js.map

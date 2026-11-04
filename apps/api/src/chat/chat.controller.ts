@@ -19,6 +19,6 @@ export class ChatController {
     @Param('agentId') agentId: string,
     @Body() dto: ChatRequestDto,
   ) {
-    return this.chatService.generateAnswer(agentId, dto.question);
+    return this.chatService.generateAnswer(agentId, dto.question, dto.conversationId);
   }
 }

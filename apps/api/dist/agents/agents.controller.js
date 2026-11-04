@@ -10,14 +10,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Body, Controller, Delete, Get, Patch, Post, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Param, Query } from '@nestjs/common';
 import { AgentsService } from './agents.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
 import { UpdateAgentDto } from './dto/update-agent.dto.js';
+import { KnowledgeProcessingService } from '../knowledge-sources/knowledge-processing.service.js';
 let AgentsController = class AgentsController {
     agentsService;
-    constructor(agentsService) {
+    knowledgeProcessingService;
+    constructor(agentsService, knowledgeProcessingService) {
         this.agentsService = agentsService;
+        this.knowledgeProcessingService = knowledgeProcessingService;
     }
     create(createAgentDto) {
         return this.agentsService.create(createAgentDto);
@@ -33,6 +36,9 @@ let AgentsController = class AgentsController {
     }
     deleteAgentById(id) {
         return this.agentsService.deleteAgentById(id);
+    }
+    searchKnowledge(agentId, question) {
+        return this.knowledgeProcessingService.searchKnowledge(agentId, question);
     }
 };
 __decorate([
@@ -70,9 +76,18 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AgentsController.prototype, "deleteAgentById", null);
+__decorate([
+    Get(':agentId/search'),
+    __param(0, Param('agentId')),
+    __param(1, Query('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AgentsController.prototype, "searchKnowledge", null);
 AgentsController = __decorate([
     Controller('agents'),
-    __metadata("design:paramtypes", [AgentsService])
+    __metadata("design:paramtypes", [AgentsService,
+        KnowledgeProcessingService])
 ], AgentsController);
 export { AgentsController };
 //# sourceMappingURL=agents.controller.js.map

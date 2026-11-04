@@ -7,7 +7,9 @@ import {
   integer,
   unique,
   check,
-  vector
+  vector,
+  jsonb,
+  pgEnum,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql/sql';
 
@@ -84,3 +86,44 @@ export const knowledgeSourceChunks = pgTable(
     ),
   ],
 );
+
+export const conversations = pgTable('conversations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  agentId: uuid('agent_id')
+    .notNull()
+    .references(() => agents.id, { onDelete: 'cascade' }),
+
+  title: varchar('title'),
+
+  createdAt: timestamp('created_at')
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .notNull(),
+});
+
+export const messageRoleEnum = pgEnum('message_role', [
+  'user',
+  'assistant',
+]);
+
+export const messages = pgTable('messages', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  conversationId: uuid('conversation_id')
+    .notNull()
+    .references(() => conversations.id, { onDelete: 'cascade' }),
+
+  role: messageRoleEnum('role').notNull(),
+
+  content: text('content').notNull(),
+
+  sources: jsonb('sources'),
+
+  createdAt: timestamp('created_at')
+    .defaultNow()
+    .notNull(),
+});

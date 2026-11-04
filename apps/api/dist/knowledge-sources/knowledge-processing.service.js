@@ -8,7 +8,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { BadRequestException, Injectable, NotFoundException, } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { DatabaseProvider } from '../db/database.provider.js';
 import { EmbeddingService } from '../embeddings/embedding.service.js';
 import { knowledgeSources, knowledgeSourceChunks, } from '../db/schema.js';
@@ -19,6 +19,30 @@ let KnowledgeProcessingService = class KnowledgeProcessingService {
     constructor(database, embeddingService) {
         this.database = database;
         this.embeddingService = embeddingService;
+    }
+    async searchKnowledge(agentId, question, limit = 5, maxDistance = 0.5) {
+        const queryEmbedding = await this.embeddingService.generateEmbedding(question);
+        const similarity = sql `
+      ${knowledgeSourceChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector
+    `;
+        const results = await this.database.db
+            .select({
+            content: knowledgeSourceChunks.content,
+            distance: similarity,
+            sourceId: knowledgeSourceChunks.knowledgeSourceId,
+            sourceTitle: knowledgeSources.title,
+            chunkIndex: knowledgeSourceChunks.chunkIndex,
+        })
+            .from(knowledgeSourceChunks)
+            .innerJoin(knowledgeSources, eq(knowledgeSourceChunks.knowledgeSourceId, knowledgeSources.id))
+            .where(sql `
+          ${knowledgeSources.agentId} = ${agentId}
+          AND ${knowledgeSources.status} = 'ready'
+          AND ${knowledgeSourceChunks.embedding} IS NOT NULL
+        `)
+            .orderBy(similarity)
+            .limit(limit);
+        return results.filter((result) => result.distance <= maxDistance);
     }
     async processKnowledgeSource(agentId, knowledgeSourceId) {
         const [source] = await this.database.db
