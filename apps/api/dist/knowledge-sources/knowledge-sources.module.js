@@ -15,6 +15,7 @@ let KnowledgeSourcesModule = class KnowledgeSourcesModule {
 KnowledgeSourcesModule = __decorate([
     Module({
         imports: [DatabaseModule, EmbeddingModule],
+        exports: [KnowledgeProcessingService],
         controllers: [KnowledgeSourcesController],
         providers: [
             KnowledgeSourcesService,

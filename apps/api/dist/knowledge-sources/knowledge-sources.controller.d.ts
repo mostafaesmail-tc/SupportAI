@@ -50,4 +50,5 @@ export declare class KnowledgeSourcesController {
         status: "ready";
         chunkCount: number;
     }>;
+    searchKnowledge(agentId: string, question: string): Promise<import("./interfaces/search-result.interface.js").SearchResult[]>;
 }

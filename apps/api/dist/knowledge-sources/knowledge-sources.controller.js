@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-import { Controller, Get, Param, Post, Body, ParseUUIDPipe, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, ParseUUIDPipe, Delete, Query } from '@nestjs/common';
 import { KnowledgeSourcesService } from './knowledge-sources.service.js';
 import { CreateKnowledgeSourceDto } from './dto/create-knowledge-source.dto.js';
 import { KnowledgeProcessingService } from './knowledge-processing.service.js';
@@ -35,6 +35,9 @@ let KnowledgeSourcesController = class KnowledgeSourcesController {
     }
     processKnowledgeSource(agentId, knowledgeSourceId) {
         return this.knowledgeProcessingService.processKnowledgeSource(agentId, knowledgeSourceId);
+    }
+    searchKnowledge(agentId, question) {
+        return this.knowledgeProcessingService.searchKnowledge(agentId, question);
     }
 };
 __decorate([
@@ -76,6 +79,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], KnowledgeSourcesController.prototype, "processKnowledgeSource", null);
+__decorate([
+    Get(':agentId/search'),
+    __param(0, Param('agentId')),
+    __param(1, Query('q')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], KnowledgeSourcesController.prototype, "searchKnowledge", null);
 KnowledgeSourcesController = __decorate([
     Controller('agents/:agentId/knowledge-sources'),
     __metadata("design:paramtypes", [KnowledgeSourcesService, KnowledgeProcessingService])

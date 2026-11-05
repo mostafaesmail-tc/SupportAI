@@ -6,9 +6,10 @@ import { LlmModule } from '../llm/llm.module.js';
 import { ChatController } from './chat.controller.js';
 import { ChatService } from './chat.service.js';
 import { AgentsModule } from '../agents/agents.module.js';
+import { ConversationsModule } from '../conversations/conversations.module.js';
 
 @Module({
-  imports: [KnowledgeSourcesModule, LlmModule, AgentsModule],
+  imports: [KnowledgeSourcesModule, LlmModule, AgentsModule, ConversationsModule],
   controllers: [ChatController],
   providers: [ChatService],
 })

@@ -7,15 +7,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service.js';
+import { LlmService } from './llm/llm.service.js';
 let AppController = class AppController {
     appService;
-    constructor(appService) {
+    llmService;
+    constructor(appService, llmService) {
         this.appService = appService;
+        this.llmService = llmService;
     }
     getHello() {
         return this.appService.getHello();
+    }
+    async generateResponse(messages) {
+        return await this.llmService.generateResponse(messages);
     }
 };
 __decorate([
@@ -24,9 +30,16 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", String)
 ], AppController.prototype, "getHello", null);
+__decorate([
+    Post('test-llm'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "generateResponse", null);
 AppController = __decorate([
     Controller(),
-    __metadata("design:paramtypes", [AppService])
+    __metadata("design:paramtypes", [AppService,
+        LlmService])
 ], AppController);
 export { AppController };
 //# sourceMappingURL=app.controller.js.map
