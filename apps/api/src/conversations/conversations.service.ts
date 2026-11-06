@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 
 import { DatabaseProvider } from '../db/database.provider.js';
 import {
@@ -74,5 +74,14 @@ export class ConversationsService {
       .from(messages)
       .where(eq(messages.conversationId, conversationId))
       .orderBy(messages.createdAt);
+  }
+
+  async findAllByAgentId(agentId: string) {
+
+    return this.database.db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.agentId, agentId))
+      .orderBy(desc(conversations.updatedAt));
   }
 }
