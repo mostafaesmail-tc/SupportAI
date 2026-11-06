@@ -167,7 +167,7 @@ SupportAI processes knowledge and user questions through the following pipeline:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/supportAI.git
+git clone https://github.com/mostafaesmail-tc/supportAI.git
 cd supportAI
 ```
 
@@ -242,10 +242,10 @@ supportAI/
 │   │       ├── agents/
 │   │       ├── chat/
 │   │       ├── conversations/
-│   │       ├── knowledge-sources/
-│   │       ├── llm/
+│   │       ├── db/
 │   │       ├── embeddings/
-│   │       └── database/
+│   │       ├── knowledge-sources/
+│   │       └── llm/
 │   │
 │   └── web/
 │       └── app/
