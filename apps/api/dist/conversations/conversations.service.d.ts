@@ -38,5 +38,12 @@ export declare class ConversationsService {
         sources: unknown;
         createdAt: Date;
     }[]>;
+    findAllByAgentId(agentId: string): Promise<{
+        id: string;
+        agentId: string;
+        title: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
 }
 export {};

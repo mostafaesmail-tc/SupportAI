@@ -8,7 +8,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { Injectable } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { DatabaseProvider } from '../db/database.provider.js';
 import { conversations, messages, } from '../db/schema.js';
 let ConversationsService = class ConversationsService {
@@ -52,6 +52,13 @@ let ConversationsService = class ConversationsService {
             .from(messages)
             .where(eq(messages.conversationId, conversationId))
             .orderBy(messages.createdAt);
+    }
+    async findAllByAgentId(agentId) {
+        return this.database.db
+            .select()
+            .from(conversations)
+            .where(eq(conversations.agentId, agentId))
+            .orderBy(desc(conversations.updatedAt));
     }
 };
 ConversationsService = __decorate([
