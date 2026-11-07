@@ -77,12 +77,22 @@ export default function AgentDetailsPage() {
         ← Back to dashboard
       </Link>
 
-      <header className="my-8">
+    <header className="my-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div>
         <h1 className="text-3xl font-bold">{agent.name}</h1>
         <p className="mt-2 text-gray-600">
           {agent.description || 'No description provided.'}
         </p>
-      </header>
+      </div>
+
+      <Link
+        href={`/agents/${agent.id}/chat`}
+        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+      >
+        <span aria-hidden="true">💬</span>
+        Chat with agent
+      </Link>
+    </header>
 
       <section className="rounded-xl border p-6">
         <h2 className="text-lg font-semibold">System prompt</h2>
