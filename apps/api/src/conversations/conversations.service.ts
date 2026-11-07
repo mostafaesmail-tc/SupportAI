@@ -84,4 +84,17 @@ export class ConversationsService {
       .where(eq(conversations.agentId, agentId))
       .orderBy(desc(conversations.updatedAt));
   }
+
+  async updateTitle(id: string, title: string) {
+    const [conversation] = await this.database.db
+      .update(conversations)
+      .set({
+        title,
+        updatedAt: new Date(),
+      })
+      .where(eq(conversations.id, id))
+      .returning();
+
+    return conversation;
+  }
 }

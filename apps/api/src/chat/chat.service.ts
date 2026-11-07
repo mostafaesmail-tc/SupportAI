@@ -36,18 +36,20 @@ export class ChatService {
 
         // 1. Find an existing conversation or create a new one.
         let conversation;
+        let isNewConversation = false;
 
         if (conversationId) {
             conversation = await this.conversationsService.findById(
-            conversationId,
-            agentId,
+                conversationId,
+                agentId,
             );
 
             if (!conversation) {
-            throw new NotFoundException('Conversation not found');
+                throw new NotFoundException('Conversation not found');
             }
         } else {
             conversation = await this.conversationsService.create(agentId);
+            isNewConversation = true;
         }
 
         // 2. Retrieve previous messages BEFORE saving the current question.
@@ -61,7 +63,15 @@ export class ChatService {
             'user',
             question,
         );
+        // 3.1 Generate a title for a new conversation.
+        if (isNewConversation) {
+            const title = this.generateConversationTitle(question);
 
+            conversation = await this.conversationsService.updateTitle(
+                conversation.id,
+                title,
+            );
+        }
         // 4. Retrieve relevant knowledge.
         const results = await this.knowledgeProcessingService.searchKnowledge(
             agentId,
@@ -134,8 +144,21 @@ export class ChatService {
 
         return {
             conversationId: conversation.id,
+            title: conversation.title,
             answer,
             sources,
         };
+    }
+
+    private generateConversationTitle(question: string): string {
+        const normalizedQuestion = question.trim().replace(/\s+/g, ' ');
+
+        const maxLength = 60;
+
+        if (normalizedQuestion.length <= maxLength) {
+            return normalizedQuestion;
+        }
+
+        return `${normalizedQuestion.slice(0, maxLength - 3).trimEnd()}...`;
     }
 }
