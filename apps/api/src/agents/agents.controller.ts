@@ -6,11 +6,13 @@ import {
   Patch,
   Post,
   Param,
-  Query
+  Query,
 } from '@nestjs/common';
+
 import { AgentsService } from './agents.service.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
 import { UpdateAgentDto } from './dto/update-agent.dto.js';
+import { SearchKnowledgeDto } from './dto/search-knowledge.dto.js';
 import { KnowledgeProcessingService } from '../knowledge-sources/knowledge-processing.service.js';
 
 @Controller('agents')
@@ -21,9 +23,8 @@ export class AgentsController {
   ) {}
 
   @Post()
-  create(@Body() createAgentDto: CreateAgentDto) {
-
-    return this.agentsService.create(createAgentDto);
+  create(@Body() dto: CreateAgentDto) {
+    return this.agentsService.create(dto);
   }
 
   @Get()
@@ -32,28 +33,31 @@ export class AgentsController {
   }
 
   @Get(':id')
-  findOneAgentById(@Param('id')id: string) {
+  findOneAgentById(@Param('id') id: string) {
     return this.agentsService.findOneAgentById(id);
   }
 
   @Patch(':id')
-  updateAgentById(@Param('id')id: string, @Body() updateAgentDto: UpdateAgentDto) {
-    return this.agentsService.updateAgentById(id, updateAgentDto);
+  updateAgentById(
+    @Param('id') id: string,
+    @Body() dto: UpdateAgentDto,
+  ) {
+    return this.agentsService.updateAgentById(id, dto);
   }
 
   @Delete(':id')
-  deleteAgentById(@Param('id')id: string) {
+  deleteAgentById(@Param('id') id: string) {
     return this.agentsService.deleteAgentById(id);
   }
 
-      @Get(':agentId/search')
-    searchKnowledge(
+  @Get(':agentId/search')
+  searchKnowledge(
     @Param('agentId') agentId: string,
-    @Query('q') question: string,
-    ) {
+    @Query() query: SearchKnowledgeDto,
+  ) {
     return this.knowledgeProcessingService.searchKnowledge(
-        agentId,
-        question,
+      agentId,
+      query.q,
     );
-    }
+  }
 }

@@ -51,5 +51,3 @@ export class KnowledgeSourcesController {
     }
 
 }
-// GET http://localhost:3001/agents/8831d50f-a26d-45ae-8888-e88c31581563/search?q=I%20forgot%20my%20password
-// 8831d50f-a26d-45ae-8888-e88c31581563
