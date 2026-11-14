@@ -1,3 +1,4 @@
+
 import {
   Body,
   Controller,
@@ -14,6 +15,8 @@ import { CreateAgentDto } from './dto/create-agent.dto.js';
 import { UpdateAgentDto } from './dto/update-agent.dto.js';
 import { SearchKnowledgeDto } from './dto/search-knowledge.dto.js';
 import { KnowledgeProcessingService } from '../knowledge-sources/knowledge-processing.service.js';
+import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
+import type { AuthenticatedUser } from '../auth/decorators/current-user.decorator.js';
 
 @Controller('agents')
 export class AgentsController {
@@ -23,38 +26,52 @@ export class AgentsController {
   ) {}
 
   @Post()
-  create(@Body() dto: CreateAgentDto) {
-    return this.agentsService.create(dto);
+  create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateAgentDto,
+  ) {
+    return this.agentsService.create(user.id, dto);
   }
 
   @Get()
-  findAll() {
-    return this.agentsService.findAll();
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.agentsService.findAll(user.id);
   }
 
   @Get(':id')
-  findOneAgentById(@Param('id') id: string) {
-    return this.agentsService.findOneAgentById(id);
+  findOneAgentById(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.agentsService.findOneAgentById(id, user.id);
   }
 
   @Patch(':id')
   updateAgentById(
     @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateAgentDto,
   ) {
-    return this.agentsService.updateAgentById(id, dto);
+    return this.agentsService.updateAgentById(id, user.id, dto);
   }
 
   @Delete(':id')
-  deleteAgentById(@Param('id') id: string) {
-    return this.agentsService.deleteAgentById(id);
+  deleteAgentById(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.agentsService.deleteAgentById(id, user.id);
   }
 
   @Get(':agentId/search')
-  searchKnowledge(
+  async searchKnowledge(
     @Param('agentId') agentId: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Query() query: SearchKnowledgeDto,
   ) {
+    // Verify ownership before searching the agent's knowledge base.
+    await this.agentsService.findOneAgentById(agentId, user.id);
+
     return this.knowledgeProcessingService.searchKnowledge(
       agentId,
       query.q,

@@ -2,7 +2,7 @@ import { Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service.js';
 import { LlmService } from './llm/llm.service.js';
 import { OllamaChatMessage } from './llm/llm.service.js';
-
+import { Public } from './auth/decorators/public.decorator.js';
 @Controller()
 export class AppController {
   constructor(
@@ -10,6 +10,7 @@ export class AppController {
     private readonly llmService: LlmService,
   ) {}
 
+  @Public()
   @Get()
   getHello(): string {
     return this.appService.getHello();

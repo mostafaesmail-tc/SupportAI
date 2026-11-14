@@ -1,9 +1,8 @@
-
 import { Test, TestingModule } from '@nestjs/testing';
 import { KnowledgeSourcesController } from './knowledge-sources.controller.js';
 import { KnowledgeSourcesService } from './knowledge-sources.service.js';
 import { KnowledgeProcessingService } from './knowledge-processing.service.js';
-
+import { AgentsService } from '../agents/agents.service.js';
 describe('KnowledgeSourcesController', () => {
   let controller: KnowledgeSourcesController;
 
@@ -18,6 +17,12 @@ describe('KnowledgeSourcesController', () => {
         {
           provide: KnowledgeProcessingService,
           useValue: {},
+        },
+        {
+          provide: AgentsService,
+          useValue: {
+            findOneAgentById: vi.fn(),
+          },
         },
       ],
     }).compile();

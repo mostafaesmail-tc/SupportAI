@@ -50,6 +50,13 @@
       "when": 1793757676841,
       "tag": "0006_icy_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794413004015,
+      "tag": "0007_authentication",
+      "breakpoints": true
     }
   ]
 }

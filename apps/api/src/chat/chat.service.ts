@@ -24,12 +24,15 @@ export class ChatService {
     ) {}
 
     async generateAnswer(
-        agentId: string,
-        question: string,
-        conversationId?: string,
-        ) {
-        const agent = await this.agentsService.findOneAgentById(agentId);
-
+    agentId: string,
+    userId: string,
+    question: string,
+    conversationId?: string,
+    ) {
+        const agent = await this.agentsService.findOneAgentById(
+            agentId,
+            userId,
+        );
         if (!agent) {
             throw new NotFoundException('Agent not found');
         }
