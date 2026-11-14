@@ -13,15 +13,43 @@ import {
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql/sql';
 
-
 export type KnowledgeSourceStatus =
-  | 'pending'
-  | 'processing'
-  | 'ready'
-  | 'failed';
+  'pending' | 'processing' | 'ready' | 'failed';
+
+export const users = pgTable(
+  'users',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: varchar('name', { length: 128 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(),
+    passwordHash: text('password_hash').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [unique('users_email_unique').on(table.email)],
+);
+
+export const refreshTokens = pgTable(
+  'refresh_tokens',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: varchar('token_hash', { length: 64 }).notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    revokedAt: timestamp('revoked_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [unique('refresh_tokens_hash_unique').on(table.tokenHash)],
+);
 
 export const agents = pgTable('agents', {
   id: uuid('id').defaultRandom().primaryKey(),
+
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
 
   name: varchar('name', { length: 128 }).notNull(),
 
@@ -33,7 +61,6 @@ export const agents = pgTable('agents', {
 
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
-
 
 export const knowledgeSources = pgTable('knowledge_sources', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -96,19 +123,12 @@ export const conversations = pgTable('conversations', {
 
   title: varchar('title'),
 
-  createdAt: timestamp('created_at')
-    .defaultNow()
-    .notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const messageRoleEnum = pgEnum('message_role', [
-  'user',
-  'assistant',
-]);
+export const messageRoleEnum = pgEnum('message_role', ['user', 'assistant']);
 
 export const messages = pgTable('messages', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -123,7 +143,5 @@ export const messages = pgTable('messages', {
 
   sources: jsonb('sources'),
 
-  createdAt: timestamp('created_at')
-    .defaultNow()
-    .notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });

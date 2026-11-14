@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { agents } from '../db/schema.js';
 import { DatabaseProvider } from '../db/database.provider.js';
 import { CreateAgentDto } from './dto/create-agent.dto.js';
@@ -13,10 +13,11 @@ import { UpdateAgentDto } from './dto/update-agent.dto.js';
 export class AgentsService {
   constructor(private readonly database: DatabaseProvider) {}
 
-  async create(input: CreateAgentDto) {
+  async create(userId: string, input: CreateAgentDto) {
     const [agent] = await this.database.db
       .insert(agents)
       .values({
+        userId,
         name: input.name,
         systemPrompt: input.systemPrompt,
         description: input.description,
@@ -26,15 +27,18 @@ export class AgentsService {
     return agent;
   }
 
-  async findAll() {
-    return this.database.db.select().from(agents);
+  async findAll(userId: string) {
+    return this.database.db
+      .select()
+      .from(agents)
+      .where(eq(agents.userId, userId));
   }
 
-  async findOneAgentById(id: string) {
+  async findOneAgentById(id: string, userId: string) {
     const [agent] = await this.database.db
       .select()
       .from(agents)
-      .where(eq(agents.id, id));
+      .where(and(eq(agents.id, id), eq(agents.userId, userId)));
 
     if (!agent) {
       throw new NotFoundException('Agent not found');
@@ -43,7 +47,11 @@ export class AgentsService {
     return agent;
   }
 
-  async updateAgentById(id: string, input: UpdateAgentDto) {
+  async updateAgentById(
+    id: string,
+    userId: string,
+    input: UpdateAgentDto,
+  ) {
     if (Object.keys(input).length === 0) {
       throw new BadRequestException('At least one field must be provided');
     }
@@ -61,7 +69,7 @@ export class AgentsService {
     const [agent] = await this.database.db
       .update(agents)
       .set(values)
-      .where(eq(agents.id, id))
+      .where(and(eq(agents.id, id), eq(agents.userId, userId)))
       .returning();
 
     if (!agent) {
@@ -71,10 +79,10 @@ export class AgentsService {
     return agent;
   }
 
-  async deleteAgentById(id: string) {
+  async deleteAgentById(id: string, userId: string) {
     const [agent] = await this.database.db
       .delete(agents)
-      .where(eq(agents.id, id))
+      .where(and(eq(agents.id, id), eq(agents.userId, userId)))
       .returning();
 
     if (!agent) {

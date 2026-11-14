@@ -1,14 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 import { AgentsService } from './agents.service.js';
 import { DatabaseProvider } from '../db/database.provider.js';
 
 describe('AgentsService', () => {
   let service: AgentsService;
+
+  const userId = 'user-uuid';
 
   const mockDb = {
     insert: vi.fn(),
@@ -24,9 +23,7 @@ describe('AgentsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    service = new AgentsService(
-      mockDatabase as unknown as DatabaseProvider,
-    );
+    service = new AgentsService(mockDatabase as unknown as DatabaseProvider);
   });
 
   describe('create', () => {
@@ -48,7 +45,7 @@ describe('AgentsService', () => {
         }),
       });
 
-      const result = await service.create(input);
+      const result = await service.create(userId, input);
 
       expect(result).toEqual(expectedAgent);
       expect(mockDb.insert).toHaveBeenCalled();
@@ -63,10 +60,12 @@ describe('AgentsService', () => {
       ];
 
       mockDb.select.mockReturnValue({
-        from: vi.fn().mockResolvedValue(expectedAgents),
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue(expectedAgents),
+        }),
       });
 
-      const result = await service.findAll();
+      const result = await service.findAll(userId);
 
       expect(result).toEqual(expectedAgents);
     });
@@ -85,7 +84,7 @@ describe('AgentsService', () => {
         }),
       });
 
-      const result = await service.findOneAgentById('agent-uuid');
+      const result = await service.findOneAgentById('agent-uuid', userId);
 
       expect(result).toEqual(expectedAgent);
     });
@@ -98,7 +97,7 @@ describe('AgentsService', () => {
       });
 
       await expect(
-        service.findOneAgentById('missing-agent'),
+        service.findOneAgentById('missing-agent', userId),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -122,10 +121,7 @@ describe('AgentsService', () => {
 
       mockDb.update.mockReturnValue({ set });
 
-      const result = await service.updateAgentById(
-        'agent-uuid',
-        input,
-      );
+      const result = await service.updateAgentById('agent-uuid', userId, input);
 
       expect(result).toEqual(expectedAgent);
       expect(set).toHaveBeenCalledWith(input);
@@ -133,7 +129,7 @@ describe('AgentsService', () => {
 
     it('should reject an empty update', async () => {
       await expect(
-        service.updateAgentById('agent-uuid', {}),
+        service.updateAgentById('agent-uuid', userId, {}),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -145,7 +141,7 @@ describe('AgentsService', () => {
       mockDb.update.mockReturnValue({ set });
 
       await expect(
-        service.updateAgentById('missing-agent', {
+        service.updateAgentById('missing-agent', userId, {
           description: 'Updated description',
         }),
       ).rejects.toThrow(NotFoundException);
@@ -164,7 +160,7 @@ describe('AgentsService', () => {
 
       mockDb.delete.mockReturnValue({ where });
 
-      const result = await service.deleteAgentById('agent-uuid');
+      const result = await service.deleteAgentById('agent-uuid', userId);
 
       expect(result).toEqual(expectedAgent);
     });
@@ -176,7 +172,7 @@ describe('AgentsService', () => {
       mockDb.delete.mockReturnValue({ where });
 
       await expect(
-        service.deleteAgentById('missing-agent'),
+        service.deleteAgentById('missing-agent', userId),
       ).rejects.toThrow(NotFoundException);
     });
   });

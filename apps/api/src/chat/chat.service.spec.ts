@@ -12,6 +12,7 @@ describe('ChatService', () => {
   let service: ChatService;
 
   const agentId = 'agent-uuid';
+  const userId = 'user-uuid';
   const conversationId = 'conversation-uuid';
 
   const agent = {
@@ -96,8 +97,13 @@ describe('ChatService', () => {
       agentsService.findOneAgentById.mockResolvedValue(null);
 
       await expect(
-        service.generateAnswer(agentId, 'How do I reset my password?'),
+        service.generateAnswer(agentId, userId, 'How do I reset my password?'),
       ).rejects.toThrow(NotFoundException);
+
+      expect(agentsService.findOneAgentById).toHaveBeenCalledWith(
+        agentId,
+        userId,
+      );
 
       expect(conversationsService.create).not.toHaveBeenCalled();
       expect(knowledgeProcessingService.searchKnowledge).not.toHaveBeenCalled();
@@ -106,6 +112,7 @@ describe('ChatService', () => {
     it('creates a new conversation when no conversation ID is provided', async () => {
       await service.generateAnswer(
         agentId,
+        userId,
         'How do I reset my password?',
       );
 
@@ -119,6 +126,7 @@ describe('ChatService', () => {
       await expect(
         service.generateAnswer(
           agentId,
+          userId,
           'How do I reset my password?',
           conversationId,
         ),
@@ -131,6 +139,7 @@ describe('ChatService', () => {
     it('uses an existing conversation without changing its title', async () => {
       await service.generateAnswer(
         agentId,
+        userId,
         'How do I reset my password?',
         conversationId,
       );
@@ -146,6 +155,7 @@ describe('ChatService', () => {
     it('saves the user message before retrieving the answer', async () => {
       await service.generateAnswer(
         agentId,
+        userId,
         'How do I reset my password?',
       );
 
@@ -176,6 +186,7 @@ describe('ChatService', () => {
 
       await service.generateAnswer(
         agentId,
+        userId,
         'How do I reset my password?',
         conversationId,
       );
@@ -214,6 +225,7 @@ describe('ChatService', () => {
 
       const result = await service.generateAnswer(
         agentId,
+        userId,
         'What is the meaning of life?',
       );
 
@@ -237,6 +249,7 @@ describe('ChatService', () => {
     it('returns the conversation ID, title, answer, and sources', async () => {
       const result = await service.generateAnswer(
         agentId,
+        userId,
         'How do I reset my password?',
       );
 
@@ -257,6 +270,7 @@ describe('ChatService', () => {
     it('normalizes whitespace when generating a new conversation title', async () => {
       const result = await service.generateAnswer(
         agentId,
+        userId,
         '  How   do I\n reset   my password?  ',
       );
 
@@ -272,10 +286,10 @@ describe('ChatService', () => {
       const question =
         'How can I configure the application to automatically reset passwords for all users?';
 
-      const result = await service.generateAnswer(agentId, question);
+      const result = await service.generateAnswer(agentId, userId, question);
 
       expect(result.title).toHaveLength(60);
-      expect(result.title.endsWith('...')).toBe(true);
+      expect(result.title?.endsWith('...')).toBe(true);
     });
   });
 });
